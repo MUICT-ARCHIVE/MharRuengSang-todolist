@@ -318,3 +318,111 @@ class TestTodoManager:
         all_todos = manager2.get_all_todos()
         assert len(all_todos) == 2
         assert {todo.title for todo in all_todos} == {"Todo 1", "Todo 2"}
+
+    # View Todo Details Tests (get_todo_by_id)
+
+    def test_get_todo_by_id_existing(self, todo_manager):
+        """Test retrieving a todo item by ID."""
+        todo = TodoItem(
+            title="Test Todo",
+            details="Test Details",
+            priority=Priority.HIGH,
+            status=Status.COMPLETED,
+            owner="user1",
+        )
+        todo_manager.add_todo(todo)
+
+        retrieved_todo = todo_manager.get_todo_by_id(todo.id)
+        assert retrieved_todo is not None
+        assert retrieved_todo.id == todo.id
+        assert retrieved_todo.title == "Test Todo"
+        assert retrieved_todo.details == "Test Details"
+        assert retrieved_todo.priority == Priority.HIGH
+        assert retrieved_todo.status == Status.COMPLETED
+        assert retrieved_todo.owner == "user1"
+
+    def test_get_todo_by_id_nonexistent(self, todo_manager):
+        """Test retrieving a non-existent todo item by ID."""
+        retrieved_todo = todo_manager.get_todo_by_id("nonexistent_id")
+        assert retrieved_todo is None
+
+    def test_get_todo_by_id_preserves_all_fields(self, todo_manager):
+        """Test that get_todo_by_id preserves all todo fields including dates."""
+        todo = TodoItem(
+            title="Full Details Todo",
+            details="Complete details with all fields",
+            priority=Priority.MID,
+            status=Status.PENDING,
+            owner="user1",
+        )
+        todo_manager.add_todo(todo)
+
+        retrieved_todo = todo_manager.get_todo_by_id(todo.id)
+        assert retrieved_todo is not None
+        assert retrieved_todo.created_at == todo.created_at
+        assert retrieved_todo.updated_at == todo.updated_at
+
+    def test_get_todo_by_id_after_update(self, todo_manager):
+        """Test that get_todo_by_id returns updated data after modification."""
+        todo = TodoItem(
+            title="Original",
+            details="Original details",
+            priority=Priority.LOW,
+            status=Status.PENDING,
+            owner="user1",
+        )
+        todo_manager.add_todo(todo)
+        original_id = todo.id
+
+        updated_todo = TodoItem(
+            id=original_id,
+            title="Updated Title",
+            details="Updated Details",
+            priority=Priority.HIGH,
+            status=Status.COMPLETED,
+            owner="user1",
+            created_at=todo.created_at,
+            updated_at="2023-01-01T12:00:00",
+        )
+        todo_manager.update_todo(original_id, updated_todo)
+
+        retrieved_todo = todo_manager.get_todo_by_id(original_id)
+        assert retrieved_todo is not None
+        assert retrieved_todo.title == "Updated Title"
+        assert retrieved_todo.details == "Updated Details"
+        assert retrieved_todo.priority == Priority.HIGH
+        assert retrieved_todo.status == Status.COMPLETED
+        assert retrieved_todo.updated_at == "2023-01-01T12:00:00"
+
+    def test_get_todo_by_id_with_multiple_todos(self, todo_manager):
+        """Test retrieving a specific todo when multiple todos exist."""
+        todos = [
+            TodoItem(title="Todo 1", owner="user1", priority=Priority.HIGH),
+            TodoItem(title="Todo 2", owner="user1", priority=Priority.MID),
+            TodoItem(title="Todo 3", owner="user2", priority=Priority.LOW),
+        ]
+
+        todo_ids = []
+        for todo in todos:
+            todo_manager.add_todo(todo)
+            todo_ids.append(todo.id)
+
+        # Retrieve the second todo
+        retrieved_todo = todo_manager.get_todo_by_id(todo_ids[1])
+        assert retrieved_todo is not None
+        assert retrieved_todo.title == "Todo 2"
+        assert retrieved_todo.owner == "user1"
+        assert retrieved_todo.priority == Priority.MID
+
+    def test_get_todo_by_id_persistence(self, temp_dir):
+        """Test that get_todo_by_id works across TodoManager instances."""
+        manager1 = TodoManager(data_dir=temp_dir)
+        todo = TodoItem(title="Persistent Todo", details="Persisted", owner="user1")
+        manager1.add_todo(todo)
+        todo_id = todo.id
+
+        manager2 = TodoManager(data_dir=temp_dir)
+        retrieved_todo = manager2.get_todo_by_id(todo_id)
+        assert retrieved_todo is not None
+        assert retrieved_todo.title == "Persistent Todo"
+        assert retrieved_todo.details == "Persisted"

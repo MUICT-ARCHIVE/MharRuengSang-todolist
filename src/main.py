@@ -69,7 +69,8 @@ class App:
             print("[2] View All Todos")
             print("[3] Add Todo")
             print("[4] Edit Todo")
-            print("[5] Logout")
+            print("[5] View Todo Details")
+            print("[6] Logout")
             choice = input("Select an option: ").strip()
 
             if choice == "1":
@@ -81,6 +82,8 @@ class App:
             elif choice == "4":
                 self.handle_edit_todo()
             elif choice == "5":
+                self.handle_view_todo_details()
+            elif choice == "6":
                 print(f"Logging out. Goodbye, {self.current_user}!")
                 self.current_user = None
                 break
@@ -192,6 +195,53 @@ class App:
                 print("Invalid choice.")
         except ValueError:
             print("Invalid input.")
+
+    def handle_view_todo_details(self):
+        """Handle viewing details of a specific todo item."""
+        todos = self.todo_manager.get_user_todos(self.current_user)
+        if not todos:
+            print("No todos found.")
+            return
+
+        print("\n--- Your Todos ---")
+        for i, todo in enumerate(todos, 1):
+            print(
+                f"[{i}] {todo.title} - {todo.status.value} - Priority: {todo.priority.value}"
+            )
+
+        try:
+            choice = int(
+                input("Enter the number of the todo to view details: ").strip()
+            )
+            if 1 <= choice <= len(todos):
+                todo = todos[choice - 1]
+                self._display_todo_item_details(todo)
+            else:
+                print("Invalid choice.")
+        except ValueError:
+            print("Invalid input.")
+
+    def _display_todo_item_details(self, todo: TodoItem):
+        """Display detailed information for a todo item.
+
+        Displays:
+        - Title
+        - Details
+        - Priority (HIGH, MID, LOW)
+        - Status (COMPLETED, PENDING)
+        - Owner
+        - Created date
+        - Updated date
+        """
+        print("\n--- Todo Item Details ---")
+        print(f"Title: {todo.title}")
+        print(f"Details: {todo.details}")
+        print(f"Priority: {todo.priority.value}")
+        print(f"Status: {todo.status.value}")
+        print(f"Owner: {todo.owner}")
+        print(f"Created Date: {todo.created_at}")
+        print(f"Updated Date: {todo.updated_at}")
+        print()
 
 
 def main():

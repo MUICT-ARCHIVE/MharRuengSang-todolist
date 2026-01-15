@@ -208,3 +208,19 @@ class TodoManager:
         todos_data = [todo for todo in todos_data if todo["id"] != todo_id]
         self._save_todos(todos_data)
         return True
+
+    def get_todo_by_id(self, todo_id: str) -> TodoItem | None:
+        """Get a specific todo item by ID.
+
+        Returns:
+            TodoItem if found, None otherwise
+        """
+        todos_data = self._load_todos()
+        for todo in todos_data:
+            if todo["id"] == todo_id:
+                # Convert string values back to enums
+                todo_dict = todo.copy()
+                todo_dict["priority"] = Priority(todo["priority"])
+                todo_dict["status"] = Status(todo["status"])
+                return TodoItem(**todo_dict)
+        return None

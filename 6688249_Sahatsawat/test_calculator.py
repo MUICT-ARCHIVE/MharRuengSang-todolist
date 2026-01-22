@@ -1,5 +1,5 @@
 import pytest
-from calculator import add, subtract, multiply, divide
+from calculator import add, subtract, multiply, divide, calculate_velocity
 
 def test_add():
     assert add(2, 3) == 5
@@ -22,3 +22,12 @@ def test_divide():
     assert divide(5, 2) == 2.5
     with pytest.raises(ValueError):
         divide(10, 0)
+
+def test_calculate_velocity():
+    assert calculate_velocity(100, 10) == 10
+    assert calculate_velocity(0, 5) == 0
+    assert calculate_velocity(50, 2) == 25
+    with pytest.raises(ValueError):
+        calculate_velocity(10, 0)
+    with pytest.raises(ValueError):
+        calculate_velocity(10, -5)

@@ -24,7 +24,7 @@ def divide(a, b):
 def calculate_velocity(distance: float, time: float) -> float:
     if time < 0:
         raise ValueError("Time must be greater than zero.")
-    return divide(distance, time)
+    return distance / time
 
 def main():
     print("Simple Calculator")
@@ -33,8 +33,9 @@ def main():
     print("2. Subtract")
     print("3. Multiply")
     print("4. Divide")
-    choice = input("Enter choice (1/2/3/4): ")
-    if choice not in {'1', '2', '3', '4'}:
+    print("5. Velocity Calculation")
+    choice = input("Enter choice (1/2/3/4/5): ")
+    if choice not in {'1', '2', '3', '4', '5'}:
         print("Invalid choice.")
         return
     try:
@@ -52,6 +53,8 @@ def main():
             print(f"Result: {multiply(num1, num2)}")
         elif choice == '4':
             print(f"Result: {divide(num1, num2)}")
+        elif choice == '5':
+            print(f"Result: {calculate_velocity(num1, num2)}")
     except ValueError as e:
         print(e)
 
